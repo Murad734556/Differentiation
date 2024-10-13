@@ -17,6 +17,14 @@
 
 Тесты запускаются в терминале командой *python -m pytest tests*
 
+# Improvements
+В проект добавлен линтер RUFF, которая автоматизирует всю возню и сама "причёсывает" код
+
+Как запустить?
+
+После скачивания расширений с *requirements.txt*
+проверяем проект с командой *ruff check .*
+
 # Requirements
 *requirements.txt*
 Скачивается на терминале командой *pip install -r requirements.txt* 

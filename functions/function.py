@@ -1,9 +1,10 @@
 """Модуль, обеспечивающий функциональность\
     работу с математическими функциями"""
 
-from sympy import sympify, simplify, nsimplify
-from .operators import OPERATORS, CONSTANTS, OperatorType, Associativity
-from .expr_parser import Parser, NUM_REGEX
+from sympy import nsimplify, simplify, sympify
+
+from .expr_parser import NUM_REGEX, Parser
+from .operators import CONSTANTS, OPERATORS, Associativity, OperatorType
 
 
 class Function:
@@ -71,17 +72,22 @@ class Function:
     def simplify(self):
         """
         Метод, который упрощает и возвращает новую функцию.
-        т.к в символьных мат. библиотеках используются другие обозначения(например: tg = tan)
+        т.к в символьных мат. библиотеках
+        используются другие обозначения(например: tg = tan)
 
         Returns:
             Function: Упрощенная функция
         """
         if not self.validate_function():
             return self
-        expr = str(self).replace('tg', 'tan').replace('e', 'E')
+        expr = str(self).replace("tg", "tan").replace("e", "E")
         simplified = str(simplify(nsimplify(sympify(expr))))
-        simplified = simplified.replace('tan', 'tg') \
-            .replace('E', 'e').replace('log', 'ln').replace('**', '^')
+        simplified = (
+            simplified.replace("tan", "tg")
+            .replace("E", "e")
+            .replace("log", "ln")
+            .replace("**", "^")
+        )
         return Function(simplified)
 
     def calculate(self, **values: dict):
@@ -116,24 +122,29 @@ class Function:
         result.left = self.left.calculate(**values)
         if OPERATORS[result.value].operator_type == OperatorType.BINARY:
             result.right = self.right.calculate(**values)
-            if result.value == '/' and result.right.value == 0.0:
+            if result.value == "/" and result.right.value == 0.0:
                 raise ZeroDivisionError
 
-            if isinstance(result.left.value, (int, float)) and \
-                    isinstance(result.right.value, (int, float)):
-                if result.value == '^' and result.left.value == 0.0 \
-                        and result.right.value <= 0:
+            if isinstance(result.left.value, (int, float)) and isinstance(
+                result.right.value, (int, float)
+            ):
+                if (
+                    result.value == "^"
+                    and result.left.value == 0.0
+                    and result.right.value <= 0
+                ):
                     raise ZeroDivisionError
                 value = OPERATORS[result.value].calculate(
-                    result.left.value, result.right.value)
+                    result.left.value, result.right.value
+                )
                 if isinstance(value, complex):
                     raise ValueError("Аргумент находится за пределами области функции")
                 result.value = value
                 result.left = result.right = None
         elif isinstance(result.left.value, (int, float)):
-            if result.value == 'sqrt' and result.left.value < 0.0:
+            if result.value == "sqrt" and result.left.value < 0.0:
                 raise ValueError("Аргумент находится за пределами области функции")
-            if result.value == 'ln' and result.left.value <= 0.0:
+            if result.value == "ln" and result.left.value <= 0.0:
                 raise ValueError("Аргумент находится за пределами области функции")
 
             value = OPERATORS[result.value].calculate(result.left.value)
@@ -141,7 +152,7 @@ class Function:
             result.left = None
         return result
 
-    def derive(self, variable: str = 'x', **values: dict) -> float:
+    def derive(self, variable: str = "x", **values: dict) -> float:
         """
         Метод принимает производную производную функции по данной переменной\
             и в данной точке.
@@ -159,21 +170,20 @@ class Function:
             float: Производная функции в данной точке.
         """
         derivative = self.diff(variable)
-        if self.validate_function(**values) \
-                and derivative.validate_function(**values):
+        if self.validate_function(**values) and derivative.validate_function(**values):
             value = derivative.calculate(**values).value
             if not isinstance(value, (int, float)):
                 raise ValueError("Точка указана неверно")
             return value
         raise ValueError("Производная в данной точке не существует")
 
-    def diff(self, variable: str = 'x'):
+    def diff(self, variable: str = "x"):
         """
         Метод дифференцирующий функцию
 
         Args:
             значение (str): По дефолту 'x'.
-                
+
         Returns:
             Function: Производная функции
         """
@@ -182,29 +192,30 @@ class Function:
 
         derivative = None
         match self.value:
-            case '+' | '-':
+            case "+" | "-":
                 derivative = self._diff_sum(variable)
-            case 'unary-':
+            case "unary-":
                 derivative = self._diff_unary_min(variable)
-            case '*':
+            case "*":
                 derivative = self._diff_prod(variable)
-            case '/':
+            case "/":
                 derivative = self._diff_div(variable)
-            case '^':
+            case "^":
                 derivative = self._diff_pow(variable)
-            case 'sqrt':
+            case "sqrt":
                 derivative = self._diff_sqrt(variable)
-            case 'exp':
+            case "exp":
                 derivative = self._diff_exp(variable)
-            case 'ln':
+            case "ln":
                 derivative = self._diff_ln(variable)
-            case 'sin':
+            case "sin":
                 derivative = self._diff_sin(variable)
-            case 'cos':
+            case "cos":
                 derivative = self._diff_cos(variable)
-            case 'tg':
+            case "tg":
                 derivative = self._diff_tg(variable)
-            case _: derivative = self._diff_var(variable)
+            case _:
+                derivative = self._diff_var(variable)
         return derivative.simplify()
 
     def _diff_sum(self, variable: str):
@@ -216,44 +227,44 @@ class Function:
 
     def _diff_unary_min(self, variable: str):
         derivative = Function()
-        derivative.value = 'unary-'
+        derivative.value = "unary-"
         derivative.left = self.left.diff(variable)
         return derivative
 
     def _diff_prod(self, variable: str):
         derivative = Function()
-        derivative.value = '+'
+        derivative.value = "+"
 
         derivative.left = Function()
-        derivative.left.value = '*'
+        derivative.left.value = "*"
         derivative.left.left = self.left.diff(variable)
         derivative.left.right = self.right
 
         derivative.right = Function()
-        derivative.right.value = '*'
+        derivative.right.value = "*"
         derivative.right.left = self.left
         derivative.right.right = self.right.diff(variable)
         return derivative
 
     def _diff_div(self, variable: str):
         derivative = Function()
-        derivative.value = '/'
+        derivative.value = "/"
 
         derivative.left = Function()
-        derivative.left.value = '-'
+        derivative.left.value = "-"
 
         derivative.left.left = Function()
-        derivative.left.left.value = '*'
+        derivative.left.left.value = "*"
         derivative.left.left.left = self.left.diff(variable)
         derivative.left.left.right = self.right
 
         derivative.left.right = Function()
-        derivative.left.right.value = '*'
+        derivative.left.right.value = "*"
         derivative.left.right.left = self.left
         derivative.left.right.right = self.right.diff(variable)
 
         derivative.right = Function()
-        derivative.right.value = '^'
+        derivative.right.value = "^"
 
         derivative.right.left = self.right
 
@@ -263,16 +274,16 @@ class Function:
 
     def _diff_pow(self, variable: str):
         derivative = Function()
-        derivative.value = '*'
+        derivative.value = "*"
 
         derivative.left = Function()
-        derivative.left.value = '+'
+        derivative.left.value = "+"
 
         derivative.left.left = Function()
-        derivative.left.left.value = '/'
+        derivative.left.left.value = "/"
 
         derivative.left.left.left = Function()
-        derivative.left.left.left.value = '*'
+        derivative.left.left.left.value = "*"
 
         derivative.left.left.left.left = self.left.diff(variable)
         derivative.left.left.left.right = self.right
@@ -280,17 +291,17 @@ class Function:
         derivative.left.left.right = self.left
 
         derivative.left.right = Function()
-        derivative.left.right.value = '*'
+        derivative.left.right.value = "*"
 
         derivative.left.right.left = Function()
-        derivative.left.right.left.value = 'ln'
+        derivative.left.right.left.value = "ln"
 
         derivative.left.right.left.left = self.left
 
         derivative.left.right.right = self.right.diff(variable)
 
         derivative.right = Function()
-        derivative.right.value = '^'
+        derivative.right.value = "^"
 
         derivative.right.left = self.left
         derivative.right.right = self.right
@@ -298,73 +309,73 @@ class Function:
 
     def _diff_sqrt(self, variable: str):
         derivative = Function()
-        derivative.value = '/'
+        derivative.value = "/"
 
         derivative.left = self.left.diff(variable)
 
         derivative.right = Function()
-        derivative.right.value = '*'
+        derivative.right.value = "*"
 
         derivative.right.left = Function()
         derivative.right.left.value = 2.0
 
         derivative.right.right = Function()
-        derivative.right.right.value = 'sqrt'
+        derivative.right.right.value = "sqrt"
         derivative.right.right.left = self.left
         return derivative
 
     def _diff_exp(self, variable: str):
         derivative = Function()
-        derivative.value = '*'
+        derivative.value = "*"
         derivative.left = self.left.diff(variable)
 
         derivative.right = Function()
-        derivative.right.value = 'exp'
+        derivative.right.value = "exp"
         derivative.right.left = self.left
         return derivative
 
     def _diff_ln(self, variable: str):
         derivative = Function()
-        derivative.value = '/'
+        derivative.value = "/"
         derivative.left = self.left.diff(variable)
         derivative.right = self.left
         return derivative
 
     def _diff_sin(self, variable: str):
         derivative = Function()
-        derivative.value = '*'
+        derivative.value = "*"
 
         derivative.left = self.left.diff(variable)
 
         derivative.right = Function()
-        derivative.right.value = 'cos'
+        derivative.right.value = "cos"
         derivative.right.left = self.left
         return derivative
 
     def _diff_cos(self, variable: str):
         derivative = Function()
-        derivative.value = 'unary-'
+        derivative.value = "unary-"
 
         derivative.left = Function()
-        derivative.left.value = '*'
+        derivative.left.value = "*"
 
         derivative.left.left = self.left.diff(variable)
 
         derivative.left.right = Function()
-        derivative.left.right.value = 'sin'
+        derivative.left.right.value = "sin"
         derivative.left.right.left = self.left
         return derivative
 
     def _diff_tg(self, variable: str):
         derivative = Function()
-        derivative.value = '/'
+        derivative.value = "/"
         derivative.left = self.left.diff(variable)
 
         derivative.right = Function()
-        derivative.right.value = '^'
+        derivative.right.value = "^"
 
         derivative.right.left = Function()
-        derivative.right.left.value = 'cos'
+        derivative.right.left.value = "cos"
         derivative.right.left.left = self.left
 
         derivative.right.right = Function()
@@ -390,8 +401,8 @@ class Function:
             return
 
         if OPERATORS[self.value].operator_type == OperatorType.PREFIX:
-            if self.value == 'unary-':
-                tokens.append('-')
+            if self.value == "unary-":
+                tokens.append("-")
             else:
                 tokens.append(self.value)
             self._tree_op_wrapper(self.left, tokens)
@@ -404,22 +415,31 @@ class Function:
 
     def _tree_op_wrapper(self, child, tokens: list) -> None:
         # pylint: disable=protected-access
-        wrap_child_operator = child.value in OPERATORS and \
-            (OPERATORS[self.value].priority
-                > OPERATORS[child.value].priority or
-             (OPERATORS[self.value].priority
-                 == OPERATORS[child.value].priority and
-              ((child == self.right and
-                OPERATORS[self.value].associativity
-                == Associativity.LEFT_ASSOCIATIVE) or
-               (child == self.left and
-                OPERATORS[self.value].associativity
-                == Associativity.RIGHT_ASSOCIATIVE))))
+        wrap_child_operator = child.value in OPERATORS and (
+            OPERATORS[self.value].priority > OPERATORS[child.value].priority
+            or (
+                OPERATORS[self.value].priority == OPERATORS[child.value].priority
+                and (
+                    (
+                        child == self.right
+                        and OPERATORS[self.value].associativity
+                        == Associativity.LEFT_ASSOCIATIVE
+                    )
+                    or (
+                        child == self.left
+                        and OPERATORS[self.value].associativity
+                        == Associativity.RIGHT_ASSOCIATIVE
+                    )
+                )
+            )
+        )
 
-        if OPERATORS[self.value].operator_type != OperatorType.BINARY\
-                or wrap_child_operator:
-            tokens.append('(')
+        if (
+            OPERATORS[self.value].operator_type != OperatorType.BINARY
+            or wrap_child_operator
+        ):
+            tokens.append("(")
             child._tokenize_tree(tokens)
-            tokens.append(')')
+            tokens.append(")")
         else:
             child._tokenize_tree(tokens)

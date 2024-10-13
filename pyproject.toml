@@ -1,0 +1,23 @@
+[project]
+requires-python = ">=3.10"
+
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.lint]
+select = [
+    "W",
+    "E",
+    "F",
+    "I", 
+    "N",
+    "DJ",
+    "T20",
+    "Q"
+]
+
+fixable = [ "I" ] #импорты
+
+ignore = [ "T201" ]
+
+

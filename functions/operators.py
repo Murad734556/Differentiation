@@ -1,12 +1,14 @@
 """Модуль описания операторов"""
-from enum import Enum
+
 import math
+from enum import Enum
 
 
 class OperatorType(Enum):
     """
     Класс Enum для описания типа оператора.
     """
+
     BINARY = 0
     PREFIX = 1
     POSTFIX = 2
@@ -16,6 +18,7 @@ class Associativity(Enum):
     """
     Класс Enum для описания ассоциативности операторов.
     """
+
     NONE = 0
     ASSOCIATIVE = 1
     LEFT_ASSOCIATIVE = 2
@@ -33,9 +36,13 @@ class Operator:
         func (callable): Соответствующая функция оператора.
     """
 
-    def __init__(self, operator_type: OperatorType,
-                 associativity: Associativity,
-                 priority: int, func: callable) -> None:
+    def __init__(
+        self,
+        operator_type: OperatorType,
+        associativity: Associativity,
+        priority: int,
+        func: callable,
+    ) -> None:
         self._operator_type = operator_type
         self._associativity = associativity
         self._priority = priority
@@ -85,35 +92,33 @@ class Operator:
 
 
 OPERATORS = {
-    '+': Operator(OperatorType.BINARY, Associativity.ASSOCIATIVE,
-                  0, lambda x, y: x + y),
-    '-': Operator(OperatorType.BINARY, Associativity.LEFT_ASSOCIATIVE,
-                  0, lambda x, y: x - y),
-    'unary-': Operator(OperatorType.PREFIX, Associativity.NONE,
-                       1, lambda x: -x),
-    '*': Operator(OperatorType.BINARY, Associativity.ASSOCIATIVE,
-                  1, lambda x, y: x * y),
-    '/': Operator(OperatorType.BINARY, Associativity.LEFT_ASSOCIATIVE,
-                  1, lambda x, y: x / y),
-    '^': Operator(OperatorType.BINARY, Associativity.RIGHT_ASSOCIATIVE,
-                  2, lambda x, y: x ** y),
-    'sqrt': Operator(OperatorType.PREFIX, Associativity.NONE,
-                     3, math.sqrt),
-    'exp': Operator(OperatorType.PREFIX, Associativity.NONE,
-                    3, math.exp),
-    'ln': Operator(OperatorType.PREFIX, Associativity.NONE,
-                   3, math.log),
-    'sin': Operator(OperatorType.PREFIX, Associativity.NONE,
-                    3, math.sin),
-    'cos': Operator(OperatorType.PREFIX, Associativity.NONE,
-                    3, math.cos),
-    'tg': Operator(OperatorType.PREFIX, Associativity.NONE,
-                   3, math.tan),
+    "+": Operator(
+        OperatorType.BINARY, Associativity.ASSOCIATIVE, 0, lambda x, y: x + y
+    ),
+    "-": Operator(
+        OperatorType.BINARY, Associativity.LEFT_ASSOCIATIVE, 0, lambda x, y: x - y
+    ),
+    "unary-": Operator(OperatorType.PREFIX, Associativity.NONE, 1, lambda x: -x),
+    "*": Operator(
+        OperatorType.BINARY, Associativity.ASSOCIATIVE, 1, lambda x, y: x * y
+    ),
+    "/": Operator(
+        OperatorType.BINARY, Associativity.LEFT_ASSOCIATIVE, 1, lambda x, y: x / y
+    ),
+    "^": Operator(
+        OperatorType.BINARY, Associativity.RIGHT_ASSOCIATIVE, 2, lambda x, y: x**y
+    ),
+    "sqrt": Operator(OperatorType.PREFIX, Associativity.NONE, 3, math.sqrt),
+    "exp": Operator(OperatorType.PREFIX, Associativity.NONE, 3, math.exp),
+    "ln": Operator(OperatorType.PREFIX, Associativity.NONE, 3, math.log),
+    "sin": Operator(OperatorType.PREFIX, Associativity.NONE, 3, math.sin),
+    "cos": Operator(OperatorType.PREFIX, Associativity.NONE, 3, math.cos),
+    "tg": Operator(OperatorType.PREFIX, Associativity.NONE, 3, math.tan),
 }
 
 CONSTANTS = {
-    'e': math.e,
-    'pi': math.pi,
-    'tau': math.tau,
-    'phi': (1 + math.sqrt(5)) / 2,
+    "e": math.e,
+    "pi": math.pi,
+    "tau": math.tau,
+    "phi": (1 + math.sqrt(5)) / 2,
 }
