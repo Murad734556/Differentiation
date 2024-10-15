@@ -195,7 +195,7 @@ class Parser:
                 if stack:
                     peek = self._peek(stack)
                     stack.pop()
-                self._parenthesis_mismatch_error_checker(peek, position, None, False)
+                self._parenthesis_mismatch_error_checker(peek, position, open_bracket_pos, False)
                 open_bracket_pos.pop()
 
             else:
@@ -215,7 +215,7 @@ class Parser:
         while stack:
             entity = stack.pop()
             self._parenthesis_mismatch_error_checker(
-                entity, None, open_bracket_pos, True
+                entity, position, open_bracket_pos, True
             )
             result.append(entity)
 
